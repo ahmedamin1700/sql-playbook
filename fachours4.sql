@@ -2,10 +2,13 @@
 /* PROMPT:
 [Output the facility id that has the highest number of slots booked, again]
 */-- MY QUERY:
-WITH total_slots AS (
+WITH ranked_slots AS (
     SELECT
         facid,
-        SUM(slots) AS total
+        SUM(slots) AS total,
+        RANK()OVER(
+    ORDER BY
+        SUM(slots) DESC) AS RANK
     FROM
         cd.bookings
     GROUP BY
@@ -14,15 +17,11 @@ WITH total_slots AS (
     facid,
     total
 FROM
-    total_slots
+    ranked_slots
 WHERE
-    total = (
-        SELECT
-            MAX(total)
-        FROM
-            total_slots
-    );
+    RANK =1;
 /* WHY:
-I used the CTE to get total slots per facility
-and then used this CTE in subquery to filter by max total and get all matching the max.
+I used the RANK() window function over the aggregated sums.
+This guarantees we capture ties for the top spot,
+while allowing the query planner to calculate the max and the aggregations in a single pass without needing a subquery.
 */

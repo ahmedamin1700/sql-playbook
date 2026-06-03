@@ -11,6 +11,7 @@ FROM
 ORDER BY
     joindate;
 /* WHY:
-I used the COUNT OVER() clause with no partition
-to get the total count for all members.
+Using an empty OVER() clause allows me to append a grand total to detail-level rows in a single pass.
+This is vastly more efficient than the alternative, which would require querying the table twice
+(once for the detail rows, and again in a subquery or cross join to get the total count)
 */
